@@ -1,0 +1,1 @@
+/home/atdodge/.cache/wal/colors-wal.vim
