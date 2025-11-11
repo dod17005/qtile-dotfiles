@@ -75,7 +75,7 @@ def show_text_power_menu(qtile):
         PopupMenuItem(
             text="Restart",
             mouse_callbacks={
-                "Button1": lazy.spawn("reboot")
+                "Button1": lazy.spawn("systemctl reboot")
             },
             highlight=colors[16],
             highlight_method="text",
@@ -83,7 +83,7 @@ def show_text_power_menu(qtile):
         PopupMenuItem(
             text="Shutdown",
             mouse_callbacks={
-                "Button1": lazy.spawn("poweroff")
+                "Button1": lazy.spawn("systemctl shutdown")
             },
             highlight_method="text",
             highlight=colors[5]
@@ -141,7 +141,7 @@ keys = [
     Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    #Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
     Key([], "XF86AudioRaiseVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ +10%"), desc="Raise volume by 10%"),
     Key([], "XF86AudioLowerVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -10%"), desc="Lower volume by 10%"),
     Key([], "XF86AudioMute", lazy.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle"), desc="Mute volume"),
@@ -369,7 +369,7 @@ def autostart():
     home = os.path.expanduser('~/.config/qtile/autostart.sh')
     subprocess.call(home)
 
-keys.append(Key([mod, "shift"], "r", lazy.run_extension(extension.J4DmenuDesktop(
+keys.append(Key([mod], "r", lazy.run_extension(extension.J4DmenuDesktop(
     background=colors[0],
     #dmenu_height=10,
     dmenu_lines=10,
