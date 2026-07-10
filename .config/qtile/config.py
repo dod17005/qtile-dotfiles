@@ -24,16 +24,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from libqtile import bar, layout, qtile, hook, extension
+####################
+# Table of Contents#
+####################
+# This block gives line numbers (or ranges) for important sections, such as 
+# screens, widgets, custom popups, etc. It's simply a reference to allow
+# quick navigation. Hope it makes life a little bit easier!
+#
+#
+#
+#
+#
+
+from libqtile import bar, layout, qtile, hook #, extension
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
+from libqtile.command.client import InteractiveCommandClient
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 from qtile_extras import widget
 from qtile_extras.widget.decorations import RectDecoration, BorderDecoration
-from qtile_extras.popup import PopupMenu, PopupMenuItem, PopupMenuSeparator
+from qtile_extras.popup import PopupMenu, PopupMenuItem, PopupMenuSeparator, PopupRelativeLayout, PopupWidget
 
 import os
 import subprocess
+
+c = InteractiveCommandClient()
 
 mod = "mod4"
 terminal = guess_terminal()
@@ -48,50 +63,99 @@ gruvbox_dark = ["#282828","#928374","#1d2021","",        # bg, gray, bg0_h
                 "#689d6a","#8ec07c","#928374","#fbf1c7", # aqua, aqua, gray, fg0
                 "#a89984","#ebdbb2","#d65d0e","#fe8019"] # gray, fg, orange, orange
 
-colors = gruvbox_dark
+sweet = ['#161925', '#C3C7D1', '#161925', '#161925', # BG, FG, BG, BG
+         '#ed254e', '#ed254e', '#ed254e', '#ed254e', # red
+         '#71f79f', '#71f79f', '#71f79f', '#71f79f', # green
+         '#f9dc5c', '#f9dc5c', '#f9dc5c', '#f9dc5c', # yellow
+         '#7cb7ff', '#7cb7ff', '#7cb7ff', '#7cb7ff', # blue
+         '#c74ded', '#c74ded', '#c74ded', '#c74ded', # magenta
+         '#00c1e4', '#00c1e4', '#00c1e4', '#00c1e4', # cyan
+         '#F2EFEA', '#555753', '#555753', '#555753' # light gray, dark gray
+         ]
+
+tokyonight = {
+            "wallpaper": "/home/atdodge/Pictures/edgedancer_wallpaper.png",
+            "colorscheme": {
+                "fg": '#c0caf5',
+                "bg": '#1a1b26',
+                "normal": {
+                    "black": '#15161e',
+                    "red": '#f7768e',
+                    "green": '#9ece6a',
+                    "yellow": '#e0af68',
+                    "blue": '#7aa2f7',
+                    "magenta": '#bb9af7',
+                    "cyan": '#7dcfff',
+                    "white": '#a9b1d6'
+                },
+                "bright": {
+                    "black": '#414868',
+                    "red": '#ff899d',
+                    "green": '#9fe044',
+                    "yellow": '#faba4a',
+                    "blue": '#8db0ff',
+                    "magenta": '#c7a9ff',
+                    "cyan": '#a4daff',
+                    "white": '#c0caf5'
+                } 
+        }
+}
+
+colors = tokyonight
 
 # Power menu
 @lazy.function
 def show_text_power_menu(qtile):
     items = [
-        PopupMenuItem(text="Power", enabled=False),
+        PopupMenuItem(text="Power", enabled=False, font="JetBrainsMono Nerd Font Regular", fontsize=16),
         PopupMenuSeparator(),
         PopupMenuItem(
             text="Lock",
             mouse_callbacks={
                 "Button1": lazy.spawn("light-locker-command -l")
             },
-            highlight=colors[16],
+            highlight=colors["colorscheme"]["bright"]["blue"],
             highlight_method="text",
+            font="JetBrainsMono Nerd Font Regular", 
+            fontsize=16
         ),
         PopupMenuItem(
             text="Log out",
             mouse_callbacks={
                 "Button1": lazy.shutdown()
             },
-            highlight=colors[16],
+            highlight=colors["colorscheme"]["bright"]["blue"],
             highlight_method="text",
+            font="JetBrainsMono Nerd Font Regular", 
+            fontsize=16
+
         ),
         PopupMenuItem(
             text="Restart",
             mouse_callbacks={
                 "Button1": lazy.spawn("systemctl reboot")
             },
-            highlight=colors[16],
+            highlight=colors["colorscheme"]["bright"]["blue"],
             highlight_method="text",
+            font="JetBrainsMono Nerd Font Regular", 
+            fontsize=16
+
         ),
         PopupMenuItem(
             text="Shutdown",
             mouse_callbacks={
-                "Button1": lazy.spawn("systemctl shutdown")
+                "Button1": lazy.spawn("/usr/sbin/poweroff")
             },
             highlight_method="text",
-            highlight=colors[5]
+            highlight=colors["colorscheme"]["bright"]["red"],
+            font="JetBrainsMono Nerd Font Regular", 
+            fontsize=16
+
         )
     ]
     menu = PopupMenu.generate(qtile, 
                               menuitems=items, 
-                              background=colors[0],
+                              background=colors["colorscheme"]["bg"],
                               )
     
     menu.show(centered=True)
@@ -141,14 +205,15 @@ keys = [
     Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    #Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
-    Key([], "XF86AudioRaiseVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ +10%"), desc="Raise volume by 10%"),
-    Key([], "XF86AudioLowerVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -10%"), desc="Lower volume by 10%"),
+    #Key([mod], "r", lazy.spawncmd(), desc="Spawn a command useng a prompt widget"),
+    Key([mod], "r", lazy.spawn("rofi -theme rounded-tokyonight-night -show drun"), desc="Spawn a command using a prompt widget"),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ +2%"), desc="Raise volume by 2%"),
+    Key([], "XF86AudioLowerVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -2%"), desc="Lower volume by 2%"),
     Key([], "XF86AudioMute", lazy.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle"), desc="Mute volume"),
     Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%"), desc="Increase brightness by 5%"),
     Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"), desc="Decrease brightness by 5%"),
     Key([mod, "shift"], "q", show_text_power_menu),
-    Key([], "Print", lazy.spawn("xfce4-screenshooter")),
+    Key([], "Print", lazy.spawn("flameshot gui")),
 
 ]
 
@@ -196,7 +261,7 @@ for i in groups:
 groups.append(
         ScratchPad("scratchpad", [
             DropDown("files", 
-                     "/usr/bin/thunar", 
+                     "thunar", 
                      height=0.5, 
                      y=0.2,
                      opacity=1)]))
@@ -205,14 +270,14 @@ keys.append(Key([mod],"z", lazy.group["scratchpad"].dropdown_toggle('files')))
 
 
 layout_style = dict(
-    border_focus=colors[16],
-    border_normal=colors[0],
+    border_focus=colors["colorscheme"]["normal"]["blue"],
+    border_normal=colors["colorscheme"]["normal"]["black"],
     border_width=3,
     margin=4,
 )
 
 layouts = [
-    layout.RatioTile(**layout_style),
+    layout.Tile(add_after_last=True, **layout_style),
     layout.Columns(**layout_style),
     layout.Max(),
     # Try more layouts by unleashing below layouts.
@@ -221,25 +286,25 @@ layouts = [
     # layout.Matrix(),
     # layout.MonadTall(),
     # layout.MonadWide(),
-    layout.Tile(**layout_style),
     layout.Floating(**layout_style),
     #layout.TreeTab(
     #    bg_color=colors[7],
+    #    section_fg=colors[23],
     #),
     # layout.VerticalTile(),
     layout.Zoomy(),
 ]
 
 widget_defaults = dict(
-    font="MesloLGS NF",
+    font="JetBrains Mono",
     fontsize=16,
-    foreground="#ebdbb2"
+    foreground=colors["colorscheme"]["bg"]
 )
 extension_defaults = widget_defaults.copy()
 
 decoration_group = {
     "decorations": [
-        RectDecoration(colour=colors[16], 
+        RectDecoration(colour=colors["colorscheme"]["normal"]["blue"], 
                        radius=12, 
                        filled=True,
                        )
@@ -249,7 +314,7 @@ decoration_group = {
 
 decoration_group_2 = {
     "decorations": [
-        BorderDecoration(colour=colors[16],
+        BorderDecoration(colour=colors["colorscheme"]["normal"]["green"],
                          border_width=[0,0,3,0],
                          )
         ]
@@ -258,51 +323,49 @@ decoration_group_2 = {
 
 spacer_length = 5
 
-def remove_app_name(text):
-    return ""
-
-
 screens = [
     Screen(
         
-        wallpaper="/home/atdodge/Pictures/Wallpapers/pxfuel.jpg",
+        wallpaper="/home/atdodge/Pictures/edgedancer_wallpaper.png",
         wallpaper_mode="fill",
                 top=bar.Bar(
             [
-                widget.CurrentLayout(**decoration_group_2),
+                widget.CurrentLayout(**decoration_group),
                 #widget.QuickExit(**decoration_group_2),
                 #widget.Sep(**sep_args),
                 widget.Spacer(length=spacer_length),
                 widget.GroupBox(highlight_method='line', 
-                                this_current_screen_border=colors[16],
-                                highlight_color = [colors[6],colors[0]],
+                                this_current_screen_border=colors["colorscheme"]["normal"]["blue"],
+                                highlight_color = [colors["colorscheme"]["normal"]["blue"],colors["colorscheme"]["bright"]["blue"]],
                                 ),
-                widget.Spacer(length=spacer_length),
-                widget.Prompt(),
-                widget.Spacer(length=spacer_length),
-                widget.Spacer(length=bar.STRETCH),
-                widget.Pomodoro(),
-                #widget.WindowName(**decoration_group_2),
+                # widget.Spacer(length=spacer_length),
+                # widget.Prompt(),
+                # widget.Spacer(length=spacer_length),
+                # widget.Spacer(length=bar.STRETCH),
+                # widget.Pomodoro(),
+                widget.WindowName(foreground=colors["colorscheme"]["fg"]),
                 widget.Spacer(length=bar.STRETCH),
                 widget.Systray(),
                 widget.Spacer(length=spacer_length),
-                widget.PulseVolume(mute_format="󰜺", fmt=" {}", **decoration_group_2),
+                #widget.GenPollCommand(cmd="podman ps -q | wc -l", shell=True, fmt=' {}', **decoration_group_2),
+                widget.Spacer(length=spacer_length),
+                widget.PulseVolume(mute_format="X", fmt="  {}", **decoration_group),
                 widget.Spacer(length=spacer_length),
                 widget.Battery(
-                    format="{char} {percent:2.0%}",
+                    format="{char}  {percent:2.0%}",
                     charge_char="󱐋",
                     discharge_char="",
                     empty_char="",
                     full_char="󰁹",
-                    **decoration_group_2),
+                    **decoration_group),
                 widget.Spacer(length=spacer_length),
-                widget.Clock(format="%Y-%m-%d %a %I:%M %p", **decoration_group_2),
+                widget.Clock(format="%I:%M %p %a %d ", **decoration_group),
             ],
             24,
-            background=colors[7],
-            #border_width=2,
-            #border_color="#928374",
-            margin=4
+            background=colors["colorscheme"]["bg"],
+            border_width=0,
+            border_color=colors["colorscheme"]["bright"]["black"],
+            margin=4,
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
@@ -366,14 +429,87 @@ wmname = "LG3D"
 # Startup script
 @hook.subscribe.startup_once
 def autostart():
-    home = os.path.expanduser('~/.config/qtile/autostart.sh')
+    home = os.path.expanduser('~/.config/qtile/scripts/autostart.sh')
     subprocess.call(home)
 
-keys.append(Key([mod], "r", lazy.run_extension(extension.J4DmenuDesktop(
-    background=colors[0],
-    #dmenu_height=10,
-    dmenu_lines=10,
-    dmenu_ignorecase=True,
-    fontsize=12,
-    font="MesloLGS NF",
-))))
+#keys.append(Key([mod], "r", lazy.run_extension(extension.J4DmenuDesktop(
+#    background=colors[0],
+#    #dmenu_height=10,
+#    #dmenu_lines=10,
+#    dmenu_ignorecase=True,
+#    fontsize=12,
+#    font="JetBrainsMono Nerd Font Regular",
+#))))
+
+# Layout switcher (in progress)
+@lazy.function
+def show_text_layout_menu(qtile):
+    items = [ 
+        PopupMenuItem(text="Layouts", enabled=False, font="JetBrainsMono Nerd Font Regular", fontsize=16),
+        PopupMenuSeparator(),
+        *(
+            PopupMenuItem(
+                text=layout_obj.name.title(),
+                font="JetBrainsMono Nerd Font Regular",
+                fontsize=16,
+                mouse_callbacks={
+                    "Button1": lazy.group.setlayout(layout_obj.name)
+                },
+                highlight=colors["colorscheme"]["bright"]["blue"],
+                highlight_method="text",
+            ) for layout_obj in layouts
+        )
+    ]
+    menu = PopupMenu.generate(qtile, 
+                              menuitems=items, 
+                              background=colors["colorscheme"]["bg"]
+                              )
+    
+    menu.show(centered=True)
+
+keys.append(Key([mod, "shift"], "r", show_text_layout_menu))
+
+def show_graphs(qtile):
+    controls = [
+        PopupWidget(
+            widget=widget.CPUGraph(),
+            width=0.45,
+            height=0.45,
+            pos_x=0.05,
+            pos_y=0.05
+        ),
+        PopupWidget(
+            widget=widget.NetGraph(),
+            width=0.45,
+            height=0.45,
+            pos_x=0.5,
+            pos_y=0.05
+        ),
+        PopupWidget(
+            widget=widget.MemoryGraph(),
+            width=0.9,
+            height=0.3,
+            pos_x=0.05,
+            pos_y=0.3
+        ),
+        PopupWidget(
+            widget=widget.TextBox(foreground='#32a852', fmt='THIS IS A TEST'),
+            width=0.9,
+            height=0.45,
+            pos_x=0.05,
+            pos_y=0.6
+        )
+    ]
+
+    layout = PopupRelativeLayout(
+        qtile,
+        width=1000,
+        height=200,
+        controls=controls,
+        background="00000060",
+        initial_focus=None,
+        close_on_click=True
+    )
+    layout.show(centered=True)
+
+keys.append( Key([mod, "shift"], "g", lazy.function(show_graphs)))
