@@ -36,6 +36,7 @@
 #
 #
 
+import libqtile.resources
 from libqtile import bar, layout, qtile, hook #, extension
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
 from libqtile.command.client import InteractiveCommandClient
@@ -47,8 +48,7 @@ from qtile_extras.popup import PopupMenu, PopupMenuItem, PopupMenuSeparator, Pop
 
 import os
 import subprocess
-
-c = InteractiveCommandClient()
+from collections.abc import Callable
 
 mod = "mod4"
 terminal = guess_terminal()
@@ -74,7 +74,7 @@ sweet = ['#161925', '#C3C7D1', '#161925', '#161925', # BG, FG, BG, BG
          ]
 
 tokyonight = {
-            "wallpaper": "/home/atdodge/Pictures/edgedancer_wallpaper.png",
+            #"wallpaper": "/home/atdodge/Pictures/edgedancer_wallpaper.png",
             "colorscheme": {
                 "fg": '#c0caf5',
                 "bg": '#1a1b26',
@@ -144,7 +144,7 @@ def show_text_power_menu(qtile):
         PopupMenuItem(
             text="Shutdown",
             mouse_callbacks={
-                "Button1": lazy.spawn("/usr/sbin/poweroff")
+                "Button1": lazy.spawn("systemctl poweroff")
             },
             highlight_method="text",
             highlight=colors["colorscheme"]["bright"]["red"],
@@ -205,15 +205,15 @@ keys = [
     Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    #Key([mod], "r", lazy.spawncmd(), desc="Spawn a command useng a prompt widget"),
-    Key([mod], "r", lazy.spawn("rofi -theme rounded-tokyonight-night -show drun"), desc="Spawn a command using a prompt widget"),
-    Key([], "XF86AudioRaiseVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ +2%"), desc="Raise volume by 2%"),
-    Key([], "XF86AudioLowerVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -2%"), desc="Lower volume by 2%"),
-    Key([], "XF86AudioMute", lazy.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle"), desc="Mute volume"),
-    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%"), desc="Increase brightness by 5%"),
-    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"), desc="Decrease brightness by 5%"),
+    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command useng a prompt widget"),
+    #Key([mod], "r", lazy.spawn("rofi -theme rounded-tokyonight-night -show drun"), desc="Spawn a command using a prompt widget"),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("wpctl set-volume @DEFAULT_SINK@ 1%+"), desc="Raise volume by 1%"),
+    Key([], "XF86AudioLowerVolume", lazy.spawn("wpctl set-volume @DEFAULT_SINK@ 1%-"), desc="Lower volume by 1%"),
+    Key([], "XF86AudioMute", lazy.spawn("wpctl set-mute @DEFAULT_SINK@ toggle"), desc="Mute volume"),
+    #Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%"), desc="Increase brightness by 5%"),
+    #Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"), desc="Decrease brightness by 5%"),
     Key([mod, "shift"], "q", show_text_power_menu),
-    Key([], "Print", lazy.spawn("flameshot gui")),
+    #Key([], "Print", lazy.spawn("flameshot gui")),
 
 ]
 
@@ -326,8 +326,8 @@ spacer_length = 5
 screens = [
     Screen(
         
-        wallpaper="/home/atdodge/Pictures/edgedancer_wallpaper.png",
-        wallpaper_mode="fill",
+        wallpaper=os.path.join(os.path.dirname(libqtile.resources.__file__), "logo.png"),
+        wallpaper_mode="center",
                 top=bar.Bar(
             [
                 widget.CurrentLayout(**decoration_group),
@@ -339,7 +339,7 @@ screens = [
                                 highlight_color = [colors["colorscheme"]["normal"]["blue"],colors["colorscheme"]["bright"]["blue"]],
                                 ),
                 # widget.Spacer(length=spacer_length),
-                # widget.Prompt(),
+                widget.Prompt(),
                 # widget.Spacer(length=spacer_length),
                 # widget.Spacer(length=bar.STRETCH),
                 # widget.Pomodoro(),
@@ -427,10 +427,10 @@ wl_xcursor_size = 24
 wmname = "LG3D"
 
 # Startup script
-@hook.subscribe.startup_once
-def autostart():
-    home = os.path.expanduser('~/.config/qtile/scripts/autostart.sh')
-    subprocess.call(home)
+#@hook.subscribe.startup_once
+#def autostart():
+#    home = os.path.expanduser('~/.config/qtile/scripts/autostart.sh')
+#    subprocess.call(home)
 
 #keys.append(Key([mod], "r", lazy.run_extension(extension.J4DmenuDesktop(
 #    background=colors[0],
